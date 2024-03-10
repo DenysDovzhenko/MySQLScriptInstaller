@@ -36,22 +36,6 @@ main() {
     esac
 }
 
-scriptHelp() {
-printf \
-"${yellowColor}MySQL Install Script${noColor}
-This script installs MySQL in the /usr/local/ directory using the tar.xz archive from the Oracle website.
-Immediately after installation, the server is launched and a new user is created with the password entered during the script execution.
-The default password for the root user is set to 11111111.
-Since the installation is performed without a package manager, the script offers to use the uninstall option to remove MySQL.\n
-Usage: ${yellowColor}./mysqlInstall.sh [-help | -install <tar.xz_file> | -uninstall]${noColor}
-\nOptions:
-  ${yellowColor}-help${noColor}           Display this help message.
-  ${yellowColor}-install <file>${noColor} Install MySQL using the specified tar.xz file.
-  ${yellowColor}-uninstall${noColor}      Uninstall MySQL and remove associated links.
-\nExample:
-  ${yellowColor}./script.sh -install mysql-8.0.23-linux-glibc2.12-x86_64.tar.xz${noColor}\n"
-}
-
 checkRoot() { [ -z "$SUDO_USER" ] && echo "This script must be run with sudo." && exit 1 ; }
 
 installing() {
@@ -61,6 +45,10 @@ installing() {
     defaultRootPassword="11111111"
 
     echo -e "${redColor}Enter future MySQL user name:${noColor}" ; read user
+    while [[ ${#user} -gt 32 ]]
+    do
+        echo -e "Username ${redColor}cannot${noColor} be greater than 32. Try again." ; read user
+    done
     echo -e "${redColor}Enter password:${noColor}" ; read -s password
 
     echo -e "${yellowColor}Checking for dependencies${noColor}" ; pacman -S --needed libaio tar
@@ -120,6 +108,22 @@ uninstalling() {
     rm -rf /usr/local/mysql
 
     exit 0
+}
+
+scriptHelp() {
+printf \
+"${yellowColor}MySQL Install Script${noColor}
+This script installs MySQL in the /usr/local/ directory using the tar.xz archive from the Oracle website.
+Immediately after installation, the server is launched and a new user is created with the password entered during the script execution.
+The default password for the root user is set to 11111111.
+Since the installation is performed without a package manager, the script offers to use the uninstall option to remove MySQL.\n
+Usage: ${yellowColor}./mysqlInstall.sh [-help | -install <tar.xz_file> | -uninstall]${noColor}
+\nOptions:
+  ${yellowColor}-help${noColor}           Display this help message.
+  ${yellowColor}-install <file>${noColor} Install MySQL using the specified tar.xz file.
+  ${yellowColor}-uninstall${noColor}      Uninstall MySQL and remove associated links.
+\nExample:
+  ${yellowColor}./script.sh -install mysql-8.0.23-linux-glibc2.12-x86_64.tar.xz${noColor}\n"
 }
 
 main "$@"; exit
