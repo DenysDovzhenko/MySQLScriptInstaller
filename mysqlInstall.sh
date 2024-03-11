@@ -17,9 +17,9 @@ main() {
 
         "-install") 
             checkRoot
-            [ -f "$2" ] && [ "$(file -b --mime-type "$2")" = "application/x-xz" ] && installing "$@" || \ 
-            echo -e "MySQL install: invalid file or path to tar.xz file ${redColor}'$2'${noColor}" \
-                    "Try ${yellowColor}-help${noColor} for more information" && exit 2
+            [[ -f "$2" ]] && [[ "$(file -b --mime-type "$2")" = "application/x-xz" ]] && installing "$@" \
+            || { echo -e "MySQL install: invalid file or path to tar.xz file ${redColor}'$2'${noColor}" \
+                    "Try ${yellowColor}-help${noColor} for more information"; exit 2; }
             ;;
 
         "-uninstall") 
@@ -36,7 +36,7 @@ main() {
     esac
 }
 
-checkRoot() { [ -z "$SUDO_USER" ] && echo "This script must be run with sudo." && exit 1 ; }
+checkRoot() { [[ -z "$SUDO_USER" ]] && echo "This script must be run with sudo." && exit 1 ; }
 
 installing() {
     mysqlArchive=$2
@@ -63,7 +63,7 @@ installing() {
 
     for file in "$baseDir"/bin/*
     do
-        [ -x "$file" ] && ln -s "$file" "$mysqlLinksDir/$(basename "$file")"
+        [[ -x "$file" ]] && ln -s "$file" "$mysqlLinksDir/$(basename "$file")"
     done
 
     echo -e "${yellowColor}Setting owner of MySQL group${noColor}"
@@ -102,7 +102,7 @@ uninstalling() {
         target="$(readlink -f "$link")"
         pathToExec="$(basename "$target")"
 
-        [ -e "$mysqlBinFiles/$pathToExec" ] && rm $link
+        [[ -e "$mysqlBinFiles/$pathToExec" ]] && rm $link
     done
 
     rm -rf /usr/local/mysql
@@ -112,12 +112,12 @@ uninstalling() {
 
 scriptHelp() {
 printf \
-"${yellowColor}MySQL Install Script${noColor}
+"${yellowColor}$0${noColor} script
 This script installs MySQL in the /usr/local/ directory using the tar.xz archive from the Oracle website.
 Immediately after installation, the server is launched and a new user is created with the password entered during the script execution.
 The default password for the root user is set to 11111111.
 Since the installation is performed without a package manager, the script offers to use the uninstall option to remove MySQL.\n
-Usage: ${yellowColor}./mysqlInstall.sh [-help | -install <tar.xz_file> | -uninstall]${noColor}
+Usage: ${yellowColor}$0 [-help | -install <tar.xz_file> | -uninstall]${noColor}
 \nOptions:
   ${yellowColor}-help${noColor}           Display this help message.
   ${yellowColor}-install <file>${noColor} Install MySQL using the specified tar.xz file.
